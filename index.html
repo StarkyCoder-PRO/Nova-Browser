@@ -1,57 +1,38 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Nova Browser 🚀</title>
-  <link rel="manifest" href="manifest.json">
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
-  </script>
+  <title>Nova Browser</title>
   <style>
-    body { margin:0; font-family:sans-serif; background:#0f172a; color:#e5e7eb; }
-    #bar { display:flex; gap:8px; padding:8px; background:#111827; align-items:center; }
-    input { flex:1; padding:6px; border-radius:6px; border:1px solid #374151; background:#1f2937; color:#e5e7eb; }
-    button { padding:6px 12px; border-radius:6px; border:1px solid #4b5563; background:#374151; color:#e5e7eb; cursor:pointer; }
-    iframe { width:100%; height:calc(100vh - 50px); border:0; background:#0b1020; }
+    body { font-family:sans-serif; margin:0; background:#111827; color:#e5e7eb; }
+    #bar { background:#1f2937; padding:10px; display:flex; }
+    #url { flex:1; padding:5px; border:none; border-radius:4px; }
+    button { margin-left:5px; padding:5px 10px; border:none; border-radius:4px; background:#374151; color:#fff; }
+    iframe { width:100%; height:90vh; border:none; }
   </style>
 </head>
 <body>
   <div id="bar">
-    <button onclick="back()">◀</button>
-    <button onclick="forward()">▶</button>
-    <button onclick="home()">🏠</button>
-    <input id="url" placeholder="Enter URL or search…" />
+    <input id="url" placeholder="Enter URL..." />
     <button onclick="go()">Go</button>
+    <button onclick="back()">Back</button>
+    <button onclick="forward()">Forward</button>
   </div>
-  <iframe id="view" src="https://www.bing.com"></iframe>
+  <iframe id="view" src="https://bing.com"></iframe>
 
   <script>
-    const view = document.getElementById('view');
-    const urlInput = document.getElementById('url');
-    const historyStack = [];
-    let index = -1;
+    const view = document.getElementById("view");
+    const urlBox = document.getElementById("url");
 
-    function normalize(input) {
-      if (/^https?:\/\//.test(input)) return input;
-      if (/\./.test(input)) return "https://" + input;
-      return "https://www.bing.com/search?q=" + encodeURIComponent(input);
+    function go() {
+      let u = urlBox.value;
+      if (!u.startsWith("http")) u = "https://" + u;
+      view.src = u;
     }
+    function back() { history.back(); }
+    function forward() { history.forward(); }
 
-    function navigate(to) {
-      const url = normalize(to);
-      if (index < historyStack.length - 1) historyStack.splice(index + 1);
-      historyStack.push(url);
-      index = historyStack.length - 1;
-      view.src = url;
-      urlInput.value = url;
-    }
-
-    function go() { navigate(urlInput.value); }
-    function home() { navigate("https://www.bing.com"); }
-    function back() { if (index > 0) { index--; view.src = historyStack[index]; urlInput.value = historyStack[index]; } }
-    function forward() { if (index < historyStack.length - 1) { index++; view.src = historyStack[index]; urlInput.value = historyStack[index]; } }
-  </script>
-</body>
-</html>
+    // Detect blocked pages (example: securly.com)
+    view.addEventListener("load", () => {
+      const currentURL = view.src;
+      if (currentURL.includes("securly.com")) {
+        view.src = "system.html"; // redirect
