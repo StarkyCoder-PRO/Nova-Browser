@@ -7,5 +7,5 @@
     "--shm-size=2g"
   ],
   "forwardPorts": [6080],
-  "postStartCommand": "bash /workspaces/${localWorkspaceFolderBasename}/start.sh"
+  "overrideCommand": false
 }
