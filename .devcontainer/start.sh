@@ -1,17 +1,24 @@
 #!/bin/bash
+set -e
 
-# Start virtual display
-Xvfb :1 -screen 0 1920x1080x24 &
+# Virtual display
 export DISPLAY=:1
 
-# Start VNC server
+echo "Starting Xvfb..."
+Xvfb :1 -screen 0 1920x1080x24 &
+
+sleep 1
+
+echo "Starting x11vnc..."
 x11vnc -display :1 -nopw -forever -shared &
 
-# Start noVNC
-websockify --web=/usr/share/novnc/ 6080 localhost:5900 &
+sleep 1
 
-# Wait a few seconds for desktop to stabilize
-sleep 5
+echo "Starting noVNC..."
+/usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 &
 
-# Launch Microsoft Edge
-microsoft-edge-stable &
+sleep 1
+
+echo "Launching Microsoft Edge..."
+microsoft-edge-stable --no-sandbox --disable-dev-shm-usage --start-maximized &
+wait
